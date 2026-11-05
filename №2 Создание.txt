@@ -1,0 +1,94 @@
+CREATE TABLE customer_types (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE order_statuses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE departments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE units (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE material_types (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE customers (
+    id VARCHAR(9) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    inn VARCHAR(12),
+    address VARCHAR(255),
+    phone VARCHAR(20),
+    customer_type_id INTEGER NOT NULL REFERENCES customer_types(id)
+);
+
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category_id INTEGER NOT NULL REFERENCES categories(id)
+);
+
+CREATE TABLE materials (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    material_type_id INTEGER NOT NULL REFERENCES material_types(id),
+    unit_id INTEGER REFERENCES units(id)
+);
+
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    order_date DATE NOT NULL,
+    customer_id VARCHAR(9) NOT NULL REFERENCES customers(id),
+    order_status_id INTEGER NOT NULL REFERENCES order_statuses(id)
+);
+
+CREATE TABLE production_orders (
+    id SERIAL PRIMARY KEY,
+    start_date DATE NOT NULL,
+    order_id INTEGER NOT NULL REFERENCES orders(id),
+    department_id INTEGER NOT NULL REFERENCES departments(id)
+);
+
+CREATE TABLE order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INTEGER NOT NULL REFERENCES orders(id),
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    quantity INTEGER NOT NULL CHECK (quantity > 0)
+);
+
+CREATE TABLE specifications (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    material_id INTEGER NOT NULL REFERENCES materials(id),
+    qty NUMERIC(10,3) NOT NULL CHECK (qty > 0),
+    time_norm NUMERIC(6,2)
+);
+
+CREATE TABLE prices (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES products(id),
+    material_id INTEGER REFERENCES materials(id),
+ price numeric(12,2) NOT NULL CHECK (price >= 0),
+  CHECK ((product_id IS NULL) <> (material_id IS NULL)));
+
+CREATE TABLE discounts (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES products(id),
+    material_id INTEGER REFERENCES materials(id),
+    discount_percent NUMERIC(5,2) NOT NULL CHECK (discount_percent BETWEEN 0 AND 100)
+);
